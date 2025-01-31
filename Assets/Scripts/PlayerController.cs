@@ -124,5 +124,12 @@ public class PlayerController : MonoBehaviour
         playerCollider.enabled = true; // Re-enable collider
         isInvincible = false; // Disable invincibility
     }
+
+    public void DisableMovement()
+    {
+        rb.velocity = Vector2.zero; // Stop movement
+        this.enabled = false; // Disable the script
+    }
+
 }
 

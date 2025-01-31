@@ -5,6 +5,8 @@ public class BackgroundScroll : MonoBehaviour
     public float scrollSpeed = 0.1f; // Positive moves right, negative moves left
     private Renderer bgRenderer;
     private Vector2 offset;
+    private bool isGameOver = false;
+
 
     public PlayerController player; // Reference to detect launch
 
@@ -15,6 +17,9 @@ public class BackgroundScroll : MonoBehaviour
 
     void Update()
     {
+        if (isGameOver) return; // Stop scrolling on game over
+
+
         if (player != null && player.IsLaunched()) // Only start scrolling after launch
         {
             if (bgRenderer != null)
@@ -27,6 +32,11 @@ public class BackgroundScroll : MonoBehaviour
                 bgRenderer.material.mainTextureOffset = offset;
             }
         }
+    }
+
+    public void StopScrolling()
+    {
+        isGameOver = true; // This stops the background from updating
     }
 }
 

@@ -37,5 +37,11 @@ public class AsteroidSpawner : MonoBehaviour
             rb.velocity = new Vector2(0, -asteroidSpeed);
         }
     }
+
+    public void StopSpawning()
+    {
+        CancelInvoke("SpawnAsteroid"); // Stop spawning new asteroids
+    }
+
 }
 

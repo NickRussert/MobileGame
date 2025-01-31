@@ -8,10 +8,18 @@ public class PlayerShooting : MonoBehaviour
     public float fireRate = 0.3f; // Time between shots
 
     private float nextFireTime = 0f;
+    private PlayerController playerController; // Reference to check if game started
+
+    void Start()
+    {
+        playerController = FindObjectOfType<PlayerController>(); // Find the player
+    }
 
     void Update()
     {
-        if (Input.GetMouseButtonDown(0) && Time.time >= nextFireTime) // Detect tap and fire rate cooldown
+        if (playerController != null && !playerController.IsLaunched()) return; // Prevent shooting before launch
+
+        if (Input.GetMouseButtonDown(0) && Time.time >= nextFireTime)
         {
             Shoot();
             nextFireTime = Time.time + fireRate;
