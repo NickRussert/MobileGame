@@ -1,9 +1,12 @@
 using UnityEngine;
+using System.Collections;
 
 public class PlayerController : MonoBehaviour
 {
     private Rigidbody2D rb;
     private bool isLaunched = false;
+    private SpriteRenderer spriteRenderer;
+    private Collider2D playerCollider; // Reference to player's collider
 
     [Header("Launch Settings")]
     public float minSwipeDistance = 0.2f; // Minimum swipe distance required to launch
@@ -12,12 +15,19 @@ public class PlayerController : MonoBehaviour
     [Header("Gyro Movement")]
     public float tiltSpeed = 3f; // Adjust sensitivity
 
+    [Header("Blink Effect")]
+    public float blinkDuration = 1f; // Total duration of blinking
+    public float blinkInterval = 0.1f; // Speed of blinking
+
+    private bool isInvincible = false; // Track invincibility status
     private Vector2 swipeStartPosition;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         rb.gravityScale = 0; // Ensure no gravity (top-down view)
+        spriteRenderer = GetComponent<SpriteRenderer>(); // Get the sprite renderer
+        playerCollider = GetComponent<Collider2D>(); // Get the player's collider
 
         // Enable Gyroscope
         if (SystemInfo.supportsGyroscope)
@@ -41,7 +51,6 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            // Capture initial touch position in world space
             swipeStartPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         }
 
@@ -51,10 +60,8 @@ public class PlayerController : MonoBehaviour
             Vector2 swipeDirection = swipeEndPosition - swipeStartPosition;
             float swipeDistance = swipeDirection.magnitude;
 
-            // Ensure swipe is long enough and primarily upward
             if (swipeDistance >= minSwipeDistance && swipeDirection.y > Mathf.Abs(swipeDirection.x))
             {
-                // Normalize and apply launch force
                 Vector2 launchForce = swipeDirection.normalized * launchMultiplier;
                 rb.velocity = launchForce;
                 isLaunched = true; // Plane is now in motion
@@ -89,6 +96,33 @@ public class PlayerController : MonoBehaviour
     public bool IsLaunched()
     {
         return isLaunched;
+    }
+
+    // Call this when the player loses a life
+    public void TakeDamage()
+    {
+        if (!isInvincible) // Only take damage if not invincible
+        {
+            StartCoroutine(BlinkAndInvincible());
+        }
+    }
+
+    IEnumerator BlinkAndInvincible()
+    {
+        isInvincible = true; // Enable invincibility
+        playerCollider.enabled = false; // Disable collider for invincibility
+
+        float elapsedTime = 0f;
+        while (elapsedTime < blinkDuration)
+        {
+            spriteRenderer.enabled = !spriteRenderer.enabled; // Toggle visibility
+            yield return new WaitForSeconds(blinkInterval);
+            elapsedTime += blinkInterval;
+        }
+
+        spriteRenderer.enabled = true; // Ensure visibility
+        playerCollider.enabled = true; // Re-enable collider
+        isInvincible = false; // Disable invincibility
     }
 }
 

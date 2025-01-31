@@ -4,20 +4,27 @@ using UnityEngine.SceneManagement;
 
 public class HealthManager : MonoBehaviour
 {
-    public int maxLives = 3; // Maximum lives
+    public int maxLives = 3;
     private int currentLives;
 
-    public Image[] heartIcons; // UI heart images
+    public Image[] heartIcons;
+    private PlayerController playerController;
 
     void Start()
     {
         currentLives = maxLives;
+        playerController = FindObjectOfType<PlayerController>(); // Get player reference
         UpdateHearts();
     }
 
     public void LoseLife()
     {
         currentLives--;
+
+        if (playerController != null)
+        {
+            playerController.TakeDamage(); // Trigger blinking effect
+        }
 
         UpdateHearts();
 
@@ -31,10 +38,7 @@ public class HealthManager : MonoBehaviour
     {
         for (int i = 0; i < heartIcons.Length; i++)
         {
-            if (i < currentLives)
-                heartIcons[i].enabled = true; // Show heart
-            else
-                heartIcons[i].enabled = false; // Hide heart
+            heartIcons[i].enabled = (i < currentLives);
         }
     }
 
