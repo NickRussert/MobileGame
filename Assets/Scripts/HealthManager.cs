@@ -13,7 +13,12 @@ public class HealthManager : MonoBehaviour
     private PlayerController playerController;
     private PlayerShooting playerShooting;
     private AsteroidSpawner asteroidSpawner;
-    private BackgroundScroll backgroundScroll; // Reference to BackgroundScroll
+    private BackgroundScroll backgroundScroll;
+
+    [Header("Audio")]
+    public AudioClip damageSound; // Assign in Inspector
+    public AudioClip gameOverSound; // Assign in Inspector
+    private AudioSource audioSource;
 
     void Start()
     {
@@ -21,9 +26,11 @@ public class HealthManager : MonoBehaviour
         playerController = FindObjectOfType<PlayerController>();
         playerShooting = FindObjectOfType<PlayerShooting>();
         asteroidSpawner = FindObjectOfType<AsteroidSpawner>();
-        backgroundScroll = FindObjectOfType<BackgroundScroll>(); // Get reference to BackgroundScroll
+        backgroundScroll = FindObjectOfType<BackgroundScroll>();
 
-        UpdateHearts();
+        audioSource = GetComponent<AudioSource>(); // Get AudioSource
+
+        UpdateHearts(); // ✅ Ensure hearts update at start
 
         if (gameOverPanel != null)
             gameOverPanel.SetActive(false);
@@ -31,20 +38,30 @@ public class HealthManager : MonoBehaviour
 
     public void LoseLife()
     {
-        if (currentLives <= 0) return; // Prevent taking damage after Game Over
+        if (currentLives <= 0) return; // Prevent losing extra lives after Game Over
 
         currentLives--;
 
         if (playerController != null)
         {
-            playerController.TakeDamage(); // Make the player blink
+            playerController.TakeDamage();
         }
 
-        UpdateHearts();
+        PlayDamageSound(); // 🔊 Play damage sound (before Game Over check)
+
+        UpdateHearts(); // ✅ Ensure UI updates
 
         if (currentLives <= 0)
         {
             GameOver();
+        }
+    }
+
+    void PlayDamageSound()
+    {
+        if (audioSource != null && damageSound != null && currentLives > 0)
+        {
+            audioSource.PlayOneShot(damageSound); // 🔊 Play damage sound
         }
     }
 
@@ -65,6 +82,9 @@ public class HealthManager : MonoBehaviour
 
         if (playerController != null)
         {
+            // Stop background sound before playing Game Over sound
+            playerController.StopBackgroundSound();
+
             // Spawn explosion at player position
             Instantiate(explosionPrefab, playerController.transform.position, Quaternion.identity);
 
@@ -81,6 +101,13 @@ public class HealthManager : MonoBehaviour
         if (backgroundScroll != null)
             backgroundScroll.StopScrolling();
 
+        // Play Game Over sound
+        if (audioSource != null && gameOverSound != null)
+        {
+            audioSource.PlayOneShot(gameOverSound);
+            Debug.Log("Game Over sound played!"); // Debug to confirm sound is triggered
+        }
+
         // Destroy all remaining asteroids
         GameObject[] asteroids = GameObject.FindGameObjectsWithTag("Asteroid");
         foreach (GameObject asteroid in asteroids)
@@ -88,6 +115,8 @@ public class HealthManager : MonoBehaviour
             Destroy(asteroid);
         }
     }
+
+
 
     public void RestartGame()
     {

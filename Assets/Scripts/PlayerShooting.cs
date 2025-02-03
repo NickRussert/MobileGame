@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerShooting : MonoBehaviour
 {
@@ -10,9 +10,14 @@ public class PlayerShooting : MonoBehaviour
     private float nextFireTime = 0f;
     private PlayerController playerController; // Reference to check if game started
 
+    [Header("Audio")]
+    public AudioClip shootingSound; // Assign in Inspector
+    private AudioSource audioSource;
+
     void Start()
     {
         playerController = FindObjectOfType<PlayerController>(); // Find the player
+        audioSource = GetComponent<AudioSource>(); // Get AudioSource
     }
 
     void Update()
@@ -35,9 +40,14 @@ public class PlayerShooting : MonoBehaviour
 
             if (rb != null)
             {
-                rb.velocity = new Vector2(0, bulletSpeed); // Move straight up
+                rb.velocity = new Vector2(0, bulletSpeed); // Move bullet straight up
+            }
+
+            // 🔊 Play shooting sound
+            if (audioSource != null && shootingSound != null)
+            {
+                audioSource.PlayOneShot(shootingSound);
             }
         }
     }
 }
-

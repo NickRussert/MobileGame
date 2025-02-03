@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 
 public class PlayerController : MonoBehaviour
@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour
     private bool isLaunched = false;
     private SpriteRenderer spriteRenderer;
     private Collider2D playerCollider; // Reference to player's collider
+    private AudioSource audioSource; // Audio source component
 
     [Header("Launch Settings")]
     public float minSwipeDistance = 0.2f; // Minimum swipe distance required to launch
@@ -19,6 +20,10 @@ public class PlayerController : MonoBehaviour
     public float blinkDuration = 1f; // Total duration of blinking
     public float blinkInterval = 0.1f; // Speed of blinking
 
+    [Header("Audio")]
+    public AudioClip launchSound; // Assign in Inspector
+    public AudioClip backgroundLoop; // Assign in Inspector
+
     private bool isInvincible = false; // Track invincibility status
     private Vector2 swipeStartPosition;
 
@@ -28,6 +33,14 @@ public class PlayerController : MonoBehaviour
         rb.gravityScale = 0; // Ensure no gravity (top-down view)
         spriteRenderer = GetComponent<SpriteRenderer>(); // Get the sprite renderer
         playerCollider = GetComponent<Collider2D>(); // Get the player's collider
+        audioSource = GetComponent<AudioSource>(); // Get AudioSource component
+
+        // Ensure audio is properly set up
+        if (audioSource != null)
+        {
+            audioSource.loop = true; // Set background music to loop
+            audioSource.playOnAwake = false; // Ensure it does not play automatically
+        }
 
         // Enable Gyroscope
         if (SystemInfo.supportsGyroscope)
@@ -65,9 +78,39 @@ public class PlayerController : MonoBehaviour
                 Vector2 launchForce = swipeDirection.normalized * launchMultiplier;
                 rb.velocity = launchForce;
                 isLaunched = true; // Plane is now in motion
+
+                PlayLaunchSound(); // 🔊 Play launch sound
+                StartBackgroundLoop(); // 🎵 Start background sound
             }
         }
     }
+
+    void PlayLaunchSound()
+    {
+        if (audioSource != null && launchSound != null)
+        {
+            audioSource.PlayOneShot(launchSound);
+        }
+    }
+
+    void StartBackgroundLoop()
+    {
+        if (audioSource != null && backgroundLoop != null)
+        {
+            audioSource.clip = backgroundLoop;
+            audioSource.Play();
+        }
+    }
+
+    public void StopBackgroundSound()
+    {
+        if (audioSource != null)
+        {
+            audioSource.Stop(); // Stop background music
+            audioSource.clip = null; // Reset the clip so it doesn’t interfere
+        }
+    }
+
 
     void HandleGyroMovement()
     {
@@ -128,8 +171,9 @@ public class PlayerController : MonoBehaviour
     public void DisableMovement()
     {
         rb.velocity = Vector2.zero; // Stop movement
+        StopBackgroundSound(); //  Stop background sound when the player dies
         this.enabled = false; // Disable the script
     }
-
 }
+
 
