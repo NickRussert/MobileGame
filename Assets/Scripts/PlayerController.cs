@@ -79,8 +79,8 @@ public class PlayerController : MonoBehaviour
                 rb.velocity = launchForce;
                 isLaunched = true; // Plane is now in motion
 
-                PlayLaunchSound(); // 🔊 Play launch sound
-                StartBackgroundLoop(); // 🎵 Start background sound
+                PlayLaunchSound(); //  Play launch sound
+                StartBackgroundLoop(); //  Start background sound
             }
         }
     }
@@ -98,9 +98,11 @@ public class PlayerController : MonoBehaviour
         if (audioSource != null && backgroundLoop != null)
         {
             audioSource.clip = backgroundLoop;
+            audioSource.volume = 0.1f; //  Adjust this value (0.0 = silent, 1.0 = full volume)
             audioSource.Play();
         }
     }
+
 
     public void StopBackgroundSound()
     {

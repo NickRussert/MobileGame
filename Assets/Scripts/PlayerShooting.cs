@@ -43,9 +43,11 @@ public class PlayerShooting : MonoBehaviour
                 rb.velocity = new Vector2(0, bulletSpeed); // Move bullet straight up
             }
 
-            // 🔊 Play shooting sound
+            // Play shooting sound
             if (audioSource != null && shootingSound != null)
             {
+                audioSource.volume = 0.5f; //  Adjust this value (0.0 = silent, 1.0 = full volume)
+
                 audioSource.PlayOneShot(shootingSound);
             }
         }
